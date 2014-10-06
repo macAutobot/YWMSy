@@ -1,0 +1,116 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Tx" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/TxTerminal"
+        android:layout_alignBottom="@+id/TxTerminal"
+        android:layout_toLeftOf="@+id/RxTerminal"
+        android:gravity="center_horizontal"
+        android:text="Rx" />
+
+     <Button
+        android:id="@+id/TurnON"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/TurnOFF"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="16dp"
+        android:text="Turn On YWMSy" />
+
+    <Button
+        android:id="@+id/DeactivateAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/ActivateAlarm"
+        android:layout_below="@+id/ActivateAlarm"
+        android:layout_marginTop="56dp"
+        android:text="Alarm &apos;Off&apos;" />
+
+    <Button
+        android:id="@+id/ActivateAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/TurnOFF"
+        android:layout_marginTop="56dp"
+        android:layout_toRightOf="@+id/textView1"
+        android:text="Alarm &apos;On&apos;" />
+
+    <Button
+        android:id="@+id/TurnOFF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/TurnON"
+        android:layout_marginTop="16dp"
+        android:text="Turn Off YWMSy" />
+
+    <TextView
+        android:id="@+id/RxTerminal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="44dp"
+        android:layout_marginRight="15dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/TxTerminal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/TurnON"
+        android:layout_marginLeft="16dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/Temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:layout_toRightOf="@+id/TxTerminal"
+        android:text="Temperature" />
+
+    <TextView
+        android:id="@+id/Batt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/Temp"
+        android:layout_alignParentBottom="true"
+        android:text="Battery" />
+
+    <TextView
+        android:id="@+id/Prox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/Temp"
+        android:layout_alignLeft="@+id/Temp"
+        android:text="Proximity" />
+
+    <Button
+        android:id="@+id/DetectSound"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/Batt"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:text="Detect Sound" />
+
+</RelativeLayout>
