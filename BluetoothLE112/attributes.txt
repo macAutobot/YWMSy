@@ -1,0 +1,6 @@
+xgatt_bdaddr 15
+xgatt_rx 18
+xgatt_tx 22
+Temp_Alert 25
+prox_alert 29
+lowBatt_Alert 33

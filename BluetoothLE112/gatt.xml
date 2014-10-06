@@ -1,0 +1,76 @@
+<?xml version ="1.0" encoding = "UTF-8" ?>
+<configuration>
+	<service uuid = "1800">
+		<description>Generic Access Profile</description>
+
+		<characteristic uuid = "2a00"> 
+			<properties read = "true" const = "true"/>
+			<value>YWMSy_1</value>
+		</characteristic>
+
+		<characteristic uuid = "2a01"> 
+			<properties read = "true" const = "true"/>
+			<value type = "hex">0080</value>
+		</characteristic>
+	</service>
+	
+	 <service uuid="180A">
+      <description>YWMSy App Information</description>
+	  <!-- Manufacturer Name String -->
+	  <!-- org.bluetooth.characteristic.manufacturer_name_string -->
+      <characteristic uuid="2a29">
+        <properties read="true" const="true" />
+        <value>Randy</value>
+		<description>Manufacturer Name</description>
+      </characteristic>
+	  
+	  <!-- Model Number String -->
+	  <!-- org.bluetooth.characteristic.model_number_string -->
+	  <characteristic uuid="2a24">
+        <properties read="true" const="true" />
+        <value>Blue GiGa BLE112</value>
+		<description>Model Number</description>
+      </characteristic>
+	  </service>
+	  
+	  <service uuid="F9266FD7-EF07-45D6-8EB6-BD74F13620F9" advertise="true">
+        <description>BLE YWMSy Service</description>
+       
+	   <characteristic uuid="38117F3C-28AB-4718-AB95-172B363F2AE0" id="xgatt_bdaddr">
+            <properties read="true" />
+            <value type="hex">001122334455</value>
+			<description>BD-Addr</description>
+        </characteristic>
+		
+		<characteristic uuid="4585C102-7784-40B4-88E1-3CB5C4FD37A3" id="xgatt_rx">
+            <properties read="true" write= "true" notify="true"/>
+			<value length="20" type = "hex" variable_length="true" />
+			<description>RX</description>
+        </characteristic>
+		
+		<characteristic uuid="E788D73B-E793-4D9E-A608-2F2BAFC59A00" id="xgatt_tx">
+            <properties read="true" write="true" write_no_response = "true" />
+			<value length="20" type= "hex" variable_length="true" > </value>
+			<description>TX</description>
+        </characteristic>
+	
+		<characteristic uuid="4585C102-7784-40B4-88E1-3CB5C4FD37A4" id="Temp_Alert">
+			<description>Celsius Temperature</description>
+			<properties  read = "true" write = "true" notify = "true"/> 
+			<value type="hex">000000000000</value>
+		</characteristic>
+		        
+        <characteristic uuid="4585C102-7784-40B4-88E1-3CB5C4FD37A5" id = "prox_alert">
+		    <description>Proximity Range</description>
+            <properties read = "true" write = "true" notify = "true"/>
+            <value length="2" type = "hex"/>
+        </characteristic>
+		
+        <characteristic uuid="4585C102-7784-40B4-88E1-3CB5C4FD37A6" id="lowBatt_Alert">
+			<description>Battery</description>
+            <properties read="true" write = "true" notify = "true" />
+            <value length="1" type = "hex"/>
+        </characteristic>
+    </service>
+	
+</configuration>

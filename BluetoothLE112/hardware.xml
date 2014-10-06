@@ -1,0 +1,9 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<hardware>
+<sleeposc  enable = "true" ppm = "30"/>
+<txpower power = "15" bias = "5" />
+<usb enable = "false" endpoint="api"/>
+<usart channel = "1" alternate = "2" baud = "19200" phase="1" endianness = "msb" endpoint = "none" flow = "false"/>
+<script enable = "true" />
+<slow_clock enable = "false"/>
+</hardware>

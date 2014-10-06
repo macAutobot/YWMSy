@@ -1,0 +1,213 @@
+dim result
+dim port
+dim data
+dim emptyBuf(1)
+dim proxbuff(2)
+dim in_len
+dim in(20)
+dim connected
+dim on_state
+dim conn
+dim rssi
+dim S
+dim P
+dim S_s
+dim P_s
+dim a
+dim b
+dim c
+dim Temp_offset
+dim celsius
+dim ascii(6)
+dim batresult
+dim tmp(1)
+dim batconn_handle
+# This example script will flash an LED connected to P0.7 every second
+
+# Boot event listener
+event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw)
+	batconn_handle=$ff
+	call system_endpoint_set_watermarks(system_endpoint_uart1,0,0)
+      #Set timer to generate event every 1s
+      call hardware_set_soft_timer(3271, 1, 0)#
+
+      # configure P0.4 and P0.5 as Output 0011 0000
+      call hardware_io_port_config_direction(0, $30)
+	  #confg P1.1-6 output and P1.7 to 0 as Input 0111 1111
+	  call hardware_io_port_config_direction(1,$7f)
+	  call hardware_io_port_config_pull(1,$7f,1)
+	  
+	  #set to advertise mode
+	  call gap_set_mode(gap_general_discoverable,gap_undirected_connectable)
+	  
+	  call sm_set_bondable_mode(1)
+
+      # Disable P0.7 pin. Parameters: I/O port to write to 0/1/2, 
+      #                               bitmask of pins to modify, 
+      #                               bitmask of pin values to set
+      call hardware_io_port_write(0, $80, 0)
+	  call gap_set_scan_parameters($c8, $c8, 1)
+	  call gap_discover(2)
+	  conn = -1
+
+end
+
+event connection_disconnected(connection, reason)
+connected = 0
+conn = -1
+    call gap_set_mode(gap_general_discoverable,gap_undirected_connectable)
+	
+	call attributes_write(xgatt_rx, 0, 0, emptyBuf(0:0))
+	call gap_set_scan_parameters($c8, $c8, 1)
+	call gap_discover(2)
+end
+ 
+ event connection_status(connection, flags, address, address_type, conn_interval, timeout, latency, bonding)	 
+	batconn_handle=connection
+	conn = connection
+	if connected = 0 then
+		#clear the UART buffer
+		#reading from it 10 times seem to do the trick
+		in_len = 24#12
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) #read from UART
+		
+		#clear the data in the GATT 
+		emptyBuf(0:1) = $0
+		call attributes_write(xgatt_rx, 0, 0, emptyBuf(0:4))
+	
+		#enable the watermarks for RX here
+		call system_endpoint_set_watermarks(system_endpoint_uart1, $1, $ff) # set RX watermark
+
+	end if
+	connected = 1	
+end
+ 
+event attributes_value(connection, reason, handle, offset, value_len, value_data)
+	#check to see if the On comm has been send via phone
+	on_state = value_data(0:value_len)
+	#if the On comm "a" has been set then make the pin connected to uC
+	# for an On interrupt on uC else just send other commands thru b,c,d,e,h  
+	if(on_state = "a") then
+		call hardware_io_port_read(0, $30)(result, port, data)
+		if data & $30 then
+			call hardware_io_port_write(0, $30, $0)
+		else
+			call hardware_io_port_write(0, $30, $30)
+		end if
+	else
+		if handle=xgatt_tx then 
+			call system_endpoint_tx(system_endpoint_uart1, value_len, value_data(0:value_len))
+		end if
+	end if
+end
+
+event system_endpoint_watermark_rx(endpoint, size)
+    if endpoint = system_endpoint_uart1 then
+      in_len = size
+      if in_len > 20 then
+        in_len = 20
+      end if
+	  #disable Rx watermark()
+	  call system_endpoint_set_watermarks(system_endpoint_uart1, $0, $ff)
+	  call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) 
+	  call attributes_write(xgatt_rx, 0, in_len, in(0:in_len))
+	  call system_endpoint_set_watermarks(system_endpoint_uart1, $1, $ff)
+    end if
+end
+
+#Timer event listener
+event hardware_soft_timer(handle)
+	#Request for ADC reading
+	call hardware_adc_read(14,3,0)
+	call hardware_adc_read(15,3,0)
+	
+	if conn < 0 
+		rssi = 0 
+	else 
+		call connection_get_rssi(conn)(conn, rssi) 
+		if P = 0 
+			P = rssi
+			proxbuff(0:1) = 6
+			call attributes_write(prox_alert,0,1,proxbuff(0:1))
+		end if 
+		S = 2*rssi+8*P 
+		P = S/10 
+		if P < 170
+            proxbuff(0:1) = $30 		
+			call attributes_write(prox_alert,0,1,proxbuff(0:1))
+		end if 
+		if P > 171 & P < 175 
+			proxbuff(0:1) = $31
+			call attributes_write(prox_alert,0,1,proxbuff(0:1))	
+		end if
+		if P > 180
+			proxbuff(0:1) = $32
+			call attributes_write(prox_alert,0,1,proxbuff(0:1))	
+		end if		
+		
+	end if 
+end
+
+
+event hardware_adc_result(input,value)
+	if(input = 14) then
+		#offset=-1600 my -1770
+		#semi calibrated to intel's bldg temp
+		Temp_offset=-1600
+		# ADC value is 12 MSB
+		celsius = value / 16
+		# Calculate temperature
+		# ADC*V_ref/ADC_max / T_coeff + offset
+		#celsius = (10*celsius*1150/2047) * 10/45 + offset
+		celsius = (10*celsius*1150/2047) * 10/45 + Temp_offset
+		#temperbuff(0:1) = 0
+		#temperbuff(0:4) = float(celsius, -1)
+		#write the temperature information to the GATT database
+		#Extracting desimals from integer
+		a = (celsius / 100)						#2X.X
+		b = (celsius / 10) + (a*-10)			#X4.X
+		c = (celsius)      + (a*-100) + (b*-10)	#XX.8
+		#+48 is for desimal -> ascii
+		ascii(0:1) = a + 48 #"2"
+		ascii(1:1) = b + 48 #"4"
+		ascii(2:1) = 46	    #"."
+		ascii(3:1) = c + 48 #"8"
+		ascii(4:1) = $ba    #"deg"
+		ascii(5:1) = 67	    #"C"
+		call attributes_write(Temp_Alert,0,6,ascii(0:2))
+	end if
+	########Battery reading#####
+	if(input = 15) then
+	    #scale value to range 0-100
+		#measurement range is 32768=1.15v*3=3.45V
+		#new battery ADC measurement is 20912=2.52v my:23935
+		#minimum battery voltage is 2.0 volts=2.0v/3.45v*32768= 18996
+		#20912-18996=1916
+		#23935
+		#batresult=(value-18995)*100/1916
+		batresult=(value-29789)*100
+		#clip to 100%
+		if batresult>100 then
+			batresult=100
+		end if
+		if batresult<0 then
+			batresult=0
+		end if
+
+		tmp(0:1)=batresult
+
+		if batconn_handle<$ff then
+			batconn_handle=$ff
+		end if
+		call attributes_write(lowBatt_Alert,0,1,tmp(0:1))
+	end if
+end
